@@ -12,6 +12,13 @@
 
   "author": "David Samuelson",
 
+  "content_scripts": [
+    {
+      "matches": ["*"],
+      "js": ["contentscript.js"]
+    }
+  ],
+
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
@@ -28,7 +35,7 @@
     "https://*/*"
   ],
 
-  
+
   "browser_action": {
     "default_icon": {
       "19": "images/icon19.png",

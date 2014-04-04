@@ -12,7 +12,7 @@
 // Suggestions
 
 _suggestions = [
-	{ 'caption': 'About', 'command': 'openNewTab', 'args': {'url': 'about.html'} },
+	{ 'caption': 'About (Tino version)', 'command': 'openNewTab', 'args': {'url': 'about.html'} },
 	{ 'caption': 'Browser Data: Clear Cache', 'command': 'removeBrowsingData', 'args': {'dataToRemove': {'cache': true}, 'options': {} }, 'closeOnComplete': true, 'shortcut': {'windows': ['Ctrl','Shift','Delete']} },
 	{ 'caption': 'Browser Data: Delete History', 'command': 'suggestHistory', 'shortcut': {'windows': ['Ctrl','Shift','Delete'], 'mac': ['⌘','⇧','⌫']} },
 	{ 'caption': 'Goto: Downloads', 'command': 'openNewTab', 'args': {'url': 'chrome://downloads/'}, 'shortcut': {'windows': ['Ctrl','Shift','J'], 'mac': ['⌘','⇧','J']} },
@@ -159,4 +159,8 @@ function openNewTab(obj) {
 
 function getCommandSuggestions() {
 	return _suggestions;
+}
+
+function switchToTab(obj) {
+	alert('Switching to ' + obj.title);
 }
