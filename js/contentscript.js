@@ -2,7 +2,7 @@
 if (window.CCPCommandPalette !== undefined) {
 
     window.ccpAPI = {};
-    var methods = ['getHTML','getAnchorCompletions'];
+    var methods = ['getHTML','getAnchorCompletions','clickAnchor'];
     for (var i = 0; i < methods.length; i++) {
         window.ccpAPI[methods[i]] = (function(method) {
             return function(tabId, arg, callback) {
@@ -33,8 +33,13 @@ else
             getAnchorCompletions : function(arg) {
                 var $a = document.getElementsByTagName('a');
                 $a = window.ccpUtil.filter($a, function(a){ return a.innerText !== undefined && a.innerText !== ''; });
-                $a = window.ccpUtil.map($a, function(a){ return { text: a.innerText, selector:'#' + a.id } });
+                $a = window.ccpUtil.map($a, function(a){ return { text: a.innerText, selector:'a[href="' + a.href + '"]' } });
                 return $a;
+            },
+
+            clickAnchor : function(selector) {
+                console.log('clicking on ' + selector);
+                return document.querySelector(selector).click();
             }
 
         };

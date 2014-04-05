@@ -1,22 +1,40 @@
 <!DOCTYPE HTML>
 <html lang="en">
-	<head>
-		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-		<title>WebCommand</title>
-		<link rel="stylesheet" href="css/style.css" type="text/css">
-		<link rel="stylesheet" href="css/reset.css" type="text/css">
-	</head>
-	<body>
-		<div id="container">
-			<div id="commandBar">
-				<input type="text" id="commandField" autocomplete="off" placeholder="Search or Type a Command"></div>
-			<div id="suggestions"></div>
-		</div>
-		<script type="text/javascript" src="js/jquery-min.js"></script>
-		<script type="text/javascript" src="js/fuse.js"></script>
-		<script type="text/javascript" src="js/commands.js"></script>
-		<script type="text/javascript" src="js/utility.js"></script>
-		<script type="text/javascript" src="js/popup.js"></script>
-		<script type="text/javascript" src="js/contentscript.js"></script>
-	</body>
+    <head>
+
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <title>Command palette</title>
+
+        <link rel="stylesheet" href="css/style.css" type="text/css">
+        <link rel="stylesheet" href="css/reset.css" type="text/css">
+        <link rel="stylesheet" type="text/css" media="screen,print" href="lib/log4javascript/main.css" title="Default" />
+
+        <script type="text/javascript" src="lib/log4javascript/log4javascript_uncompressed.js"></script>
+        <script type="text/javascript" src="js/jquery-min.js"></script>
+        <script type="text/javascript" src="js/fuse.js"></script>
+        <script type="text/javascript" src="js/commands.js"></script>
+        <script type="text/javascript" src="js/utility.js"></script>
+        <script type="text/javascript" src="js/popup.js"></script>
+        <script type="text/javascript" src="js/contentscript.js"></script>
+
+    </head>
+    <body>
+        <div id="container">
+            <div id="commandBar">
+                <input type="text" id="commandField" autocomplete="off" placeholder="Search or Type a Command"></div>
+            <div id="suggestions"></div>
+        </div>
+        <script type="text/javascript">
+
+            debugger;
+
+            var log = log4javascript.getLogger("main");
+            var appender = new log4javascript.InPageAppender();
+            log.addAppender(appender);
+            log.debug("This is a debugging message from the log4javascript in-page page");
+
+            appender.show();
+
+        </script>
+    </body>
 </html>

@@ -166,4 +166,5 @@ function switchToTab(obj) {
 }
 
 function clickOnElement(selector) {
+	window.ccpAPI.clickAnchor(selector);
 }
