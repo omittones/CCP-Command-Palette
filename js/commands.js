@@ -164,3 +164,6 @@ function getCommandSuggestions() {
 function switchToTab(obj) {
 	alert('Switching to ' + obj.title);
 }
+
+function clickOnElement(selector) {
+}
