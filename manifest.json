@@ -10,7 +10,7 @@
     "128": "images/icon128.png"
   },
 
-  "author": "David Samuelson",
+  "author": "Augustin Juricic & David Samuelson",
 
   "content_scripts": [
     {

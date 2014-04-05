@@ -34,6 +34,7 @@ window.CCPCommandPalette = function(){
      * when the user presses enter.
      */
     function onUserChoice() {
+
         var selected = $('.selected');
 
         if (_currentCallBack) {
@@ -52,7 +53,7 @@ window.CCPCommandPalette = function(){
      * Repopulates the suggestions with
      * ask(arrayOfSuggestions, callBack(inputvalue:string) - optional)
      */
-    function suggestToUser(suggestions, placeholder) {
+    function suggestToUser(suggestions, fuzzySearch, placeholder) {
         _callBack = null;
 
         $('#commandField').val('');
@@ -60,19 +61,13 @@ window.CCPCommandPalette = function(){
             placeholder = DEFAULT_PLACEHOLDER;
         $('#commandField').attr('placeholder', placeholder);
 
-        populateSuggestions(suggestions);
+        populateSuggestions(suggestions, fuzzySearch);
     }
 
     /*
      * Clears and then fills the suggestions with possible suggestions
      */
-    function populateSuggestions(suggestions) {
-
-        var options = {
-            keys: ['caption']
-        }
-
-        var fuzzySearch = new Fuse(suggestions, options);
+    function populateSuggestions(suggestions, fuzzySearch) {
 
         var suggestionsElement = $('#suggestions');
 
@@ -194,41 +189,25 @@ window.CCPCommandPalette = function(){
         }
     }
 
-    function getListOfSuggestions(callback) {
-
-        getCurrentTab(function(tab) {
-
-            window.ccpAPI.getAnchorCompletions(tab.id, null, function(data) {
-                var suggestions = window.ccpUtil.map(data, function(item) {
-                    return { 'caption': 'Click anchor: ' + item.text, 'command': 'clickOnElement', 'args': item.selector };
-                });
-                callback(suggestions);
-            });
-
-        });
-
-        return;
-
-        callback(getCommandSuggestions());
-    }
-
     /*
      *  DOM Ready
      */
     $(document).ready(function() {
 
-
-
         // Bring focus to the input box, to make the user feel safe
         $('#commandField').focus();
 
         // Ask user about command suggestions
-        var suggestions = getListOfSuggestions(function(suggestions){
+        getCommands(function(suggestions) {
 
-            suggestToUser(suggestions);
+            var fuzzySearch = new Fuse(suggestions, {
+                keys: ['caption']
+            });
+
+            suggestToUser(suggestions, fuzzySearch);
 
             $('#commandField').on('input', function() {
-                populateSuggestions(suggestions);
+                populateSuggestions(suggestions, fuzzySearch);
             })
 
             // On keydown
@@ -258,7 +237,7 @@ window.CCPCommandPalette = function(){
                         }
                     } else if (e.which == 8) { // Backspace Keycode
                         if ($('#commandField').val() == '') {
-                            suggestToUser(suggestions);
+                            suggestToUser(suggestions, fuzzySearch);
                         }
                     }
                 }
