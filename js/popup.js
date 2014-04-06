@@ -1,4 +1,6 @@
-window.CCPCommandPalette = function(){
+var CCP = CCP || {};
+
+(function(CCP) {
 
     var OS = {
         'unknown': 0,
@@ -8,7 +10,6 @@ window.CCPCommandPalette = function(){
     }
 
     var DEFAULT_PLACEHOLDER = 'Search or Type a Command';
-    var _currentCallBack;
     var _os = detectOS();
 
 
@@ -25,7 +26,6 @@ window.CCPCommandPalette = function(){
         if (typeof placeholder === 'undefined')
             placeholder = DEFAULT_PLACEHOLDER;
         $('#commandField').attr('placeholder', placeholder);
-        _currentCallBack = callBack;
     }
 
 
@@ -37,16 +37,9 @@ window.CCPCommandPalette = function(){
 
         var selected = $('.selected');
 
-        if (_currentCallBack) {
-            _currentCallBack($('#commandField').val());
-        } else {
-            var command = $(selected).data('command');
-            var args = $(selected).data('args');
-            callFunctionFromStr(command, args);
-        }
+        var command = $(selected).data('command');
 
-        if ($(selected).data('closeOnComplete'))
-            window.close();
+        CCP.Engine.ExecuteCommand(command);
     }
 
     /*
@@ -86,13 +79,7 @@ window.CCPCommandPalette = function(){
             suggestion.addClass('suggestion');
 
             // Data
-            $(suggestion).data('command', suggestionObject.command);
-            if (suggestionObject.args)
-                $(suggestion).data('args', suggestionObject.args);
-            if (suggestionObject.closeOnComplete)
-                $(suggestion).data('closeOnComplete', suggestionObject.closeOnComplete)
-            else
-                $(suggestion).data('closeOnComplete', false)
+            $(suggestion).data('command', suggestionObject);
 
             // Image
             if (suggestionObject.image) {
@@ -198,7 +185,7 @@ window.CCPCommandPalette = function(){
         $('#commandField').focus();
 
         // Ask user about command suggestions
-        getCommands(function(suggestions) {
+        CCP.Engine.GetAllCommands(function(suggestions) {
 
             var fuzzySearch = new Fuse(suggestions, {
                 keys: ['caption']
@@ -260,20 +247,6 @@ window.CCPCommandPalette = function(){
         });
     });
 
-
-    /* ==============================================================================
-     *     UTILITY FUNCTIONS
-     * ==============================================================================
-     */
-
-    /*
-     * Calls a function given the funciton's name
-     */
-    function callFunctionFromStr(functionName, args) {
-        window[functionName](args);
-    }
-
-
     /*
      * Returns the believed Operating System of the user
      */
@@ -285,5 +258,4 @@ window.CCPCommandPalette = function(){
         return OS.unknown;
     }
 
-};
-window.CCPCommandPalette();
+})(CCP);

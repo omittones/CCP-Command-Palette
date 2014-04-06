@@ -1,4 +1,6 @@
-window.ccpUtil = {
+var CCP = CCP || {};
+
+CCP.Utils = {
 
 	filter: function(array, filter) {
 	    var filtered = [];
@@ -15,5 +17,11 @@ window.ccpUtil = {
 	        mapped.push(map(array[i]));
 	    }
 	    return mapped;
+	},
+	each: function(array, action) {
+	    for(var i = 0; i<array.length;i++) {
+	        action(array[i]);
+	    }
 	}
+
 };

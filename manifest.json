@@ -14,12 +14,16 @@
 
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "matches": ["file:///*/*","*://*/*"],
       "js": ["js/utility.js"]
     },
     {
-      "matches": ["*://*/*"],
-      "js": ["js/contentscript.js"]
+      "matches": ["file:///*/*","*://*/*"],
+      "js": ["js/commands.js"]
+    },
+    {
+      "matches": ["file:///*/*","*://*/*"],
+      "js": ["js/client_engine.js"]
     }
   ],
 
