@@ -44,28 +44,35 @@ var CCP = CCP || {};
                 commandNames.push(command);
             }
 
+            var allCommands = [];
+
             function loadCommandVariants(index) {
 
-                var allCommands = [];
-
                 if (index >= commandNames.length) {
+
                     if (callback)
                         callback(allCommands);
-                };
-
-                var command = CCP.Commands[commandNames[index]];
-
-                if (command.shouldInitiateOnClient()) {
-                    callOnClient(commandNames[index], 'getVariants', null, function(returnValue) {
-                        allCommands.concat(ccpUtil.map(returnValue, function(obj){ obj.command = commandNames[index]; }));
-                        loadCommandVariants(index + 1);
-                    });
 
                 } else {
 
-                    var returnValue = command.getVariants();
-                    allCommands.concat(ccpUtil.map(returnValue, function(obj){ obj.command = commandNames[index]; }));
-                    loadCommandVariants(index + 1);
+                    var command = CCP.Commands[commandNames[index]];
+
+                    if (command.shouldInitiateOnClient()) {
+                        callOnClient(commandNames[index], 'getVariants', null, function(returnValue) {
+
+                            var mapped = CCP.Utils.map(returnValue, function(obj){ obj.command = commandNames[index]; return obj; });
+                            CCP.Utils.each(mapped, function(obj) { allCommands.push(obj); });
+                            loadCommandVariants(index + 1);
+
+                        });
+
+                    } else {
+
+                        var returnValue = command.getVariants();
+                        var mapped = CCP.Utils.map(returnValue, function(obj){ obj.command = commandNames[index]; return obj; });
+                        CCP.Utils.each(mapped, function(obj) { allCommands.push(obj); });
+                        loadCommandVariants(index + 1);
+                    }
                 }
             }
 
@@ -76,7 +83,7 @@ var CCP = CCP || {};
 
             if (obj.shouldInvokeOnClient) {
 
-                callOnClient(obj.command, 'invokeVariant', obj.invokeArg, handleCommandReturn);
+                callOnClient(obj.command, 'invokeVariant', obj.invocationArg, handleCommandReturn);
 
             } else {
 

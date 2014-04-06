@@ -95,8 +95,9 @@ CCP.Commands = {
                 }
             ];
 
-            return window.ccpUtil.map(commands, function(obj) {
+            return CCP.Utils.map(commands, function(obj) {
                 obj.shouldInvokeOnClient = false;
+                return obj;
             });
         },
 
@@ -113,6 +114,7 @@ CCP.Commands = {
         }
 
     },
+
     CommandClickAnchor : {
 
         shouldInitiateOnClient : function() {
@@ -124,8 +126,8 @@ CCP.Commands = {
             var anchorNodes = document.querySelectorAll('a');
             console.debug('Found ' + anchorNodes.length + ' total anchors...');
 
-            anchorNodes = window.ccpUtil.filter(anchorNodes, function(anchorNode){ return anchorNode.innerText !== undefined && anchorNode.innerText !== ''; });
-            anchorNodes = window.ccpUtil.map(anchorNodes, function(anchorNode) {
+            anchorNodes = CCP.Utils.filter(anchorNodes, function(anchorNode){ return anchorNode.innerText !== undefined && anchorNode.innerText !== ''; });
+            anchorNodes = CCP.Utils.map(anchorNodes, function(anchorNode) {
                 var selector;
                 if (anchorNode.id)
                     selector = '#' + anchorNode.id;
@@ -137,7 +139,7 @@ CCP.Commands = {
                 return { 'caption': 'Click link: ' + anchorNode.innerText, 'invocationArg':selector, 'shouldInvokeOnClient':true };
             });
 
-            anchorNodes = window.ccpUtil.filter(anchorNodes, function(obj) { return obj !== null; });
+            anchorNodes = CCP.Utils.filter(anchorNodes, function(obj) { return obj !== null; });
             console.debug('Found ' + anchorNodes.length + ' valid anchors...');
 
             return anchorNodes;
@@ -148,7 +150,57 @@ CCP.Commands = {
             document.querySelector(selector).click();
             return { closeContext:true };
         }
+    },
 
+    CommandFocusOnInput : {
+
+        shouldInitiateOnClient : function() {
+            return true;
+        },
+
+        getVariants : function() {
+
+            var inputNodes = document.querySelectorAll('input[type="text"]');
+            inputNodes = CCP.Utils.map(inputNodes, function(inputNode) {
+
+                var selector;
+                var labelAccessor;
+                if (inputNode.id) {
+                    selector = '#' + inputNode.id;
+                    labelAccessor = function() { return document.querySelector('label[for="' + inputNode.id + '"]'); };
+                }
+                else if (inputNode.name) {
+                    selector = 'input[name="' + inputNode.name + '"]';
+                    labelAccessor = function() { return null; };
+                }
+                else
+                    return null;
+
+                var text = null;
+                if (inputNode.placeholder)
+                    text = inputNode.placeholder;
+                else {
+                    var label = labelAccessor();
+                    if (label) text = label.innerText;
+                }
+
+                if (text == null) return null;
+
+                return { 'caption': 'Focus text input: ' + text, 'invocationArg':selector, 'shouldInvokeOnClient':true };
+            });
+
+            inputNodes = CCP.Utils.filter(inputNodes, function(obj) { return obj !== null; });
+
+            console.debug('Found ' + inputNodes.length + ' valid text inputs...');
+
+            return inputNodes;
+        },
+
+        invokeVariant : function(selector) {
+            console.debug('Ivoking focus action on ' + selector);
+            document.querySelector(selector).focus();
+            return { closeContext:true };
+        }
     }
 
 };
