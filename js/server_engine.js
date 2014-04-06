@@ -35,6 +35,8 @@ var CCP = CCP || {};
 
     }
 
+    var lastSelectedCommand = null;
+
     CCP.Engine = {
 
         GetAllCommands : function(callback) {
@@ -77,6 +79,30 @@ var CCP = CCP || {};
             }
 
             loadCommandVariants(0);
+        },
+
+        PreviewCommand :  function (obj) {
+
+            if (obj.shouldInvokeOnClient) {
+
+                if (lastSelectedCommand != null)
+                    callOnClient(lastSelectedCommand.command, 'unlightVariant', lastSelectedCommand.invocationArg, null);
+                callOnClient(obj.command, 'highlightVariant', obj.invocationArg, null);
+
+
+            } else {
+
+                if (lastSelectedCommand != null) {
+                    var commandExecutor = CCP.Commands[lastSelectedCommand.command];
+                    commandExecutor.unlightVariant(lastSelectedCommand.invocationArg);
+                }
+
+                var commandExecutor = CCP.Commands[obj.command];
+                commandExecutor.highlightVariant(obj.invocationArg);
+
+            }
+
+            lastSelectedCommand = obj;
         },
 
         ExecuteCommand :  function (obj) {

@@ -7,7 +7,8 @@ chrome.extension.onRequest.addListener(
         console.debug('Received client request for ' + request.command + '.' + request.method);
         if(CCP.Commands[request.command] && CCP.Commands[request.command][request.method]) {
 
-            var rv = CCP.Commands[request.command][request.method](request.arg);
+            var method = CCP.Commands[request.command][request.method];
+            var rv = method.apply(CCP.Commands[request.command], [request.arg]);
 
             sendResponse({
                 command: request.command,

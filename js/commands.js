@@ -101,6 +101,14 @@ CCP.Commands = {
             });
         },
 
+        highlightVariant : function(arg) {
+
+        },
+
+        unlightVariant : function(arg) {
+
+        },
+
         invokeVariant : function(arg) {
 
             console.debug('Invoking helper method ' + arg.command);
@@ -123,26 +131,67 @@ CCP.Commands = {
 
         getVariants : function() {
 
+            var variants = [];
+
             var anchorNodes = document.querySelectorAll('a');
             console.debug('Found ' + anchorNodes.length + ' total anchors...');
 
-            anchorNodes = CCP.Utils.filter(anchorNodes, function(anchorNode){ return anchorNode.innerText !== undefined && anchorNode.innerText !== ''; });
-            anchorNodes = CCP.Utils.map(anchorNodes, function(anchorNode) {
+            var hmap = {};
+            CCP.Utils.each(anchorNodes, function(node) {
+                if (hmap[node.innerText] === undefined)
+                    hmap[node.innerText] = [];
+                hmap[node.innerText].push(node);
+            });
+
+            function pushCommand(anchorNode, text) {
+
+                if (text === '') return;
                 var selector;
                 if (anchorNode.id)
                     selector = '#' + anchorNode.id;
                 else if (anchorNode.attributes && anchorNode.attributes['href'])
                     selector = 'a[href="' + anchorNode.attributes['href'].value + '"]';
                 else
-                    return null;
+                    return;
 
-                return { 'caption': 'Click link: ' + anchorNode.innerText, 'invocationArg':selector, 'shouldInvokeOnClient':true };
-            });
+                variants.push({ 'caption': 'Click link: ' + text, 'invocationArg':selector, 'shouldInvokeOnClient':true });
+            }
 
-            anchorNodes = CCP.Utils.filter(anchorNodes, function(obj) { return obj !== null; });
-            console.debug('Found ' + anchorNodes.length + ' valid anchors...');
+            for(var key in hmap) {
+                var group = hmap[key];
+                if (group.length == 1) {
+                    pushCommand(group[0], key);
+                } else {
+                    for(var i = 0; i < group.length; i++) {
+                        pushCommand(group[i], group[i].parentElement.innerText);
+                    }
+                }
+            }
 
-            return anchorNodes;
+            console.debug('Found ' + variants.length + ' valid anchors...');
+
+            return variants;
+        },
+
+        _oldStyles : {},
+
+        highlightVariant : function(selector) {
+
+            var node = document.querySelector(selector);
+            this._oldStyles[selector] = { backgroundColor:node.style.backgroundColor, padding:node.style.padding };
+            node.style.backgroundColor = '#aaaaaa';
+            node.style.padding = '5px';
+
+        },
+
+        unlightVariant : function(selector) {
+
+            var old = this._oldStyles[selector];
+            this._oldStyles[selector] = null;
+            var node = document.querySelector(selector);
+            node.style.backgroundColor = old.backgroundColor;
+            node.style.padding = old.padding;
+
         },
 
         invokeVariant : function(selector) {
@@ -194,6 +243,14 @@ CCP.Commands = {
             console.debug('Found ' + inputNodes.length + ' valid text inputs...');
 
             return inputNodes;
+        },
+
+        highlightVariant : function(selector) {
+
+        },
+
+        unlightVariant : function(selector) {
+
         },
 
         invokeVariant : function(selector) {

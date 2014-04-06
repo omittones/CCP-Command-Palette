@@ -157,8 +157,13 @@ var CCP = CCP || {};
      * and then scrolls to show selection.
      */
     function selectSuggestion(suggestionElement) {
+
         $('.selected').removeClass('selected');
         $(suggestionElement).addClass('selected');
+
+        //preview command, like link highlight or similar
+        var command = $(suggestionElement).data('command');
+        CCP.Engine.PreviewCommand(command);
 
         /* Scroll suggestion into view */
         var offset = $(suggestionElement).position().top; // Suggestion's offset from parent
