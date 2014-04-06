@@ -19,7 +19,11 @@
     },
     {
       "matches": ["*://*/*"],
-      "js": ["js/contentscript.js"]
+      "js": ["js/commands.js"]
+    },
+    {
+      "matches": ["*://*/*"],
+      "js": ["js/client_engine.js"]
     }
   ],
 
