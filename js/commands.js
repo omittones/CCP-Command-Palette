@@ -230,7 +230,10 @@ CCP.Commands = {
                     text = inputNode.placeholder;
                 else {
                     var label = labelAccessor();
-                    if (label) text = label.innerText;
+                    if (label)
+                        text = label.innerText;
+                    else if (inputNode.title)
+                        text = inputNode.title;
                 }
 
                 if (text == null) return null;

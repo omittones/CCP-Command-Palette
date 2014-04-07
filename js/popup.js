@@ -2,6 +2,67 @@ var CCP = CCP || {};
 
 (function(CCP) {
 
+    function fuzzyMatch(searchSet, searchKeyAccessor, query) {
+
+        function highlight(string) {
+            return '<strong>' + string + '</strong>';
+        }
+
+        var tokens = query.toLowerCase().split(' ').join('');
+        var matches = [];
+
+        if (query === '') {
+
+            searchSet.forEach(function(obj) {
+
+                matches.push({
+                    match: obj,
+                    highlighted: searchKeyAccessor(obj),
+                    positions: []
+                });
+
+            });
+
+        } else {
+
+            searchSet.forEach(function(obj) {
+
+                var searchKey = searchKeyAccessor(obj);
+                var normalizedSearchKey = searchKey.toLowerCase();
+
+                var tokenIndex = 0,
+                    positionInKey = 0,
+                    matchWithHighlights = '',
+                    matchedPositions = [];
+
+                while (positionInKey < searchKey.length) {
+                    if (normalizedSearchKey[positionInKey] === tokens[tokenIndex]) {
+                        matchWithHighlights += highlight(searchKey[positionInKey]);
+                        matchedPositions.push(positionInKey);
+                        tokenIndex++;
+
+                        if (tokenIndex >= tokens.length) {
+                            matches.push({
+                                match: obj,
+                                highlighted: matchWithHighlights + searchKey.slice(positionInKey + 1),
+                                positions: matchedPositions
+                            });
+
+                            break;
+                        }
+                    }
+                    else {
+                        matchWithHighlights += searchKey[positionInKey];
+                    }
+
+                    positionInKey++;
+                }
+            });
+        }
+
+        return matches;
+    }
+
     var OS = {
         'unknown': 0,
         'mac': 1,
@@ -12,15 +73,7 @@ var CCP = CCP || {};
     var DEFAULT_PLACEHOLDER = 'Search or Type a Command';
     var _os = detectOS();
 
-
-
-
-
-
     function askUser(placeholder, callBack) {
-        _currentSuggestions = null;
-        _currentFuzzySearch = null;
-
         $('#commandField').val('');
         $('#suggestions').empty();
         if (typeof placeholder === 'undefined')
@@ -42,11 +95,15 @@ var CCP = CCP || {};
         CCP.Engine.ExecuteCommand(command);
     }
 
+    function searchKeyAccessor(command) {
+        return command.caption;
+    }
+
     /*
      * Repopulates the suggestions with
      * ask(arrayOfSuggestions, callBack(inputvalue:string) - optional)
      */
-    function suggestToUser(suggestions, fuzzySearch, placeholder) {
+    function suggestToUser(suggestions, placeholder) {
         _callBack = null;
 
         $('#commandField').val('');
@@ -54,13 +111,13 @@ var CCP = CCP || {};
             placeholder = DEFAULT_PLACEHOLDER;
         $('#commandField').attr('placeholder', placeholder);
 
-        populateSuggestions(suggestions, fuzzySearch);
+        populateSuggestions(suggestions);
     }
 
     /*
      * Clears and then fills the suggestions with possible suggestions
      */
-    function populateSuggestions(suggestions, fuzzySearch) {
+    function populateSuggestions(suggestions) {
 
         var suggestionsElement = $('#suggestions');
 
@@ -74,7 +131,11 @@ var CCP = CCP || {};
          * return:
          *   element - A suggestion HTML element
          */
-        function createHTMLSuggestion(suggestionObject) {
+        function createHTMLSuggestion(match) {
+
+            var suggestionObject = match.match;
+
+
             var suggestion = $('<a>');
             suggestion.addClass('suggestion');
 
@@ -90,7 +151,7 @@ var CCP = CCP || {};
             }
 
             // Caption
-            suggestion.append($('<span>').addClass('caption').text(suggestionObject.caption));
+            suggestion.append($('<span>').addClass('caption').html(match.highlighted));
 
             // Desciption
             if (suggestionObject.description)
@@ -129,26 +190,15 @@ var CCP = CCP || {};
 
         // The value of the input ignoring bad characters
         var commandFieldVal = $('#commandField').val().replace(/\W/g, '');
-        // If the input field is empty
-        if (commandFieldVal == '') {
-            // Fill with every suggestion
-            for (var i = suggestions.length - 1; i >= 0; i--) {
-                var suggestion = createHTMLSuggestion(suggestions[i]);
-                suggestionsElement.prepend(suggestion);
-            }
-            if (suggestions.length > 0)
-                selectSuggestion($('.suggestion').first());
-        } else {
-            // Fuzzy search for results Fill with results
-            var results = fuzzySearch.search(commandFieldVal);
-            for (var i = results.length - 1; i >= 0; i--) {
-                var suggestion = createHTMLSuggestion(results[i]);
-                suggestionsElement.prepend(suggestion);
-            };
-            if (results.length > 0)
-                selectSuggestion($('.suggestion').first());
-        }
 
+        // Fuzzy search for results Fill with results
+        var results = fuzzyMatch(suggestions, searchKeyAccessor, commandFieldVal);
+        for (var i = results.length - 1; i >= 0; i--) {
+            var suggestion = createHTMLSuggestion(results[i]);
+            suggestionsElement.prepend(suggestion);
+        };
+        if (results.length > 0)
+            selectSuggestion($('.suggestion').first());
     }
 
 
@@ -192,14 +242,10 @@ var CCP = CCP || {};
         // Ask user about command suggestions
         CCP.Engine.GetAllCommands(function(suggestions) {
 
-            var fuzzySearch = new Fuse(suggestions, {
-                keys: ['caption']
-            });
-
-            suggestToUser(suggestions, fuzzySearch);
+            suggestToUser(suggestions);
 
             $('#commandField').on('input', function() {
-                populateSuggestions(suggestions, fuzzySearch);
+                populateSuggestions(suggestions);
             })
 
             // On keydown
@@ -229,7 +275,7 @@ var CCP = CCP || {};
                         }
                     } else if (e.which == 8) { // Backspace Keycode
                         if ($('#commandField').val() == '') {
-                            suggestToUser(suggestions, fuzzySearch);
+                            suggestToUser(suggestions);
                         }
                     }
                 }
